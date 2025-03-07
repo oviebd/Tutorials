@@ -6,6 +6,7 @@
 //
 
 import XCTest
+
 @testable import URLProtocol_APITesting
 
 final class PhotoApiServiceTests: XCTestCase {
