@@ -14,7 +14,7 @@ final class PhotoApiServiceTests: XCTestCase {
     
     lazy var api: MockPhotoAPIService = {
          let httpClient = URLSessionHTTPClient(session: mockSession)
-        return MockPhotoAPIService(session: mockSession, url: dummyURL)
+        return MockPhotoAPIService(httpClient: httpClient, url: dummyURL)
      }()
 
      override func tearDown() {

@@ -16,8 +16,9 @@ class PhotoAPIService {
     let url: URL
    // let urlPath = "https://picsum.photos/v2/list?limit=50"
 
-    init(session: URLSession, url : URL) {
-        self.httpClient = URLSessionHTTPClient(session: session)
+    init(httpClient: HTTPClient, url : URL) {
+       // self.httpClient = URLSessionHTTPClient(session: session)
+        self.httpClient = httpClient
         self.url = url
     }
 
