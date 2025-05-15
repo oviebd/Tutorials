@@ -17,7 +17,7 @@ class ToDoLocalDataStore {
         let description: String
     }
 
-    static let modelName = "PDFDataContainer"
+    static let modelName = "ToDoDataContainer"
     static let model = NSManagedObjectModel(name: modelName, in: Bundle(for: ToDoLocalDataStore.self))
 
     private let container: NSPersistentContainer
@@ -48,7 +48,6 @@ class ToDoLocalDataStore {
 
     func insert(pdfDatas: [ToDoCoreDataModel]) async throws -> Bool {
         try await perform { context in
-            let fetchRequest: NSFetchRequest<ToDoEntity> = ToDoEntity.fetchRequest()
           
             pdfDatas.forEach { model in
                 let entity = ToDoEntity(context: context)
@@ -70,44 +69,64 @@ class ToDoLocalDataStore {
         }
     }
 
+//    func update(updatedData: ToDoCoreDataModel) async throws -> ToDoCoreDataModel {
+//        try await perform { context in
+//            let request: NSFetchRequest<ToDoEntity> = ToDoEntity.fetchRequest()
+//            request.predicate = NSPredicate(format: "id == %@", updatedData.id)
+//            request.fetchLimit = 1
+//
+//            guard let entity = try context.fetch(request).first else {
+//                throw NSError(domain: "UpdateError", code: 404, userInfo: nil)
+//            }
+//
+//            entity.convertFromCoreDataModel(coreData: updatedData)
+//            try context.save()
+//            return updatedData
+//        }
+//    }
+    
     func update(updatedData: ToDoCoreDataModel) async throws -> ToDoCoreDataModel {
-        try await perform { context in
-            let request: NSFetchRequest<ToDoEntity> = ToDoEntity.fetchRequest()
-            request.predicate = NSPredicate(format: "id == %@", updatedData.id)
-            request.fetchLimit = 1
+        let results = try await filter(parameters: ["id": updatedData.id])
 
-            guard let entity = try context.fetch(request).first else {
-                throw NSError(domain: "UpdateError", code: 404, userInfo: nil)
-            }
+        guard let entity = results.first else {
+            throw NSError(domain: "UpdateError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Entity not found for id: \(updatedData.id)"])
+        }
 
-            entity.convertFromCoreDataModel(coreData: updatedData)
+        return try await perform { context in
+            // Get the managed object in the current context
+            let objectInContext = try context.existingObject(with: entity.objectID) as! ToDoEntity
+            objectInContext.convertFromCoreDataModel(coreData: updatedData)
             try context.save()
             return updatedData
         }
     }
 
     func delete(pdfKey: String) async throws -> Bool {
-        try await perform { context in
-            let request: NSFetchRequest<ToDoEntity> = ToDoEntity.fetchRequest()
-            request.predicate = NSPredicate(format: "key == %@", pdfKey)
-            request.fetchLimit = 1
+        let results = try await filter(parameters: ["id": pdfKey])
+        
+        guard let entity = results.first else {
+            throw NSError(domain: "DeleteError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Entity not found for key: \(pdfKey)"])
+        }
 
-            guard let entity = try context.fetch(request).first else {
-                throw NSError(domain: "DeleteError", code: 404, userInfo: nil)
-            }
-
-            context.delete(entity)
+        return try await perform { context in
+            let objectInContext = try context.existingObject(with: entity.objectID)
+            context.delete(objectInContext)
             try context.save()
             return true
         }
     }
 
+
+
     func filter(parameters: [String: Any]) async throws -> [ToDoEntity] {
         try await perform { context in
             let request: NSFetchRequest<ToDoEntity> = ToDoEntity.fetchRequest()
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates:
-                parameters.map { NSPredicate(format: "%K == %@", $0.key, "\($0.value)") }
-            )
+
+            let predicates = parameters.map { key, value in
+                NSPredicate(format: "%K == %@", argumentArray: [key, value])
+            }
+
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
             return try context.fetch(request)
         }
     }
