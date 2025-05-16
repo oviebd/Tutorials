@@ -26,3 +26,9 @@ extension ToDoCoreDataModel: Equatable {
             lhs.isDone == rhs.isDone
     }
 }
+
+extension ToDoCoreDataModel {
+    func toTodoModelData() -> TodoModel {
+        return TodoModel(id: id, note: note, isDone: isDone)
+    }
+}

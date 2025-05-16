@@ -18,3 +18,9 @@ class TodoModel{
         self.isDone = isDone
     }
 }
+
+extension TodoModel {
+    func toCoreDataModel() -> ToDoCoreDataModel {
+        return ToDoCoreDataModel(id: id, note: note, isDone: isDone)
+    }
+}

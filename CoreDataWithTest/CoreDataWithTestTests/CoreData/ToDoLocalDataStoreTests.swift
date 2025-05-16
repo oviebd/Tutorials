@@ -29,7 +29,7 @@ final class ToDoLocalDataStoreTests: XCTestCase {
     /// Test inserting a ToDo item and then retrieving it.
     /// Expects: Insert returns true, and retrieve returns the inserted item.
     func testInsertAndRetrieveToDo() async throws {
-        let todo = ToDoTestHelper.makeDummy(note: "Test Note", isDone: false)
+        let todo = ToDoTestHelper.makeDummyTodoCoreDataModel(note: "Test Note", isDone: false)
         let success = try await sut.insert(pdfDatas: [todo])
         XCTAssertTrue(success)
         
@@ -41,7 +41,7 @@ final class ToDoLocalDataStoreTests: XCTestCase {
     /// Test updating a ToDo item.
     /// Expects: Update returns the modified item, and the retrieved data matches the update.
     func testUpdateToDo() async throws {
-        var todo = ToDoTestHelper.makeDummy(note: "Initial", isDone: false)
+        var todo = ToDoTestHelper.makeDummyTodoCoreDataModel(note: "Initial", isDone: false)
         let success = try await sut.insert(pdfDatas: [todo])
         XCTAssertTrue(success)
         
@@ -61,11 +61,11 @@ final class ToDoLocalDataStoreTests: XCTestCase {
     /// Test deleting a ToDo item.
     /// Expects: Deletion is successful and the item is no longer retrieved.
     func testDeleteToDo() async throws {
-        let todo = ToDoTestHelper.makeDummy(note: "To be deleted", isDone: false)
+        let todo = ToDoTestHelper.makeDummyTodoCoreDataModel(note: "To be deleted", isDone: false)
         let success = try await sut.insert(pdfDatas: [todo])
         XCTAssertTrue(success)
         
-        let deleted = try await sut.delete(pdfKey: todo.id)
+        let deleted = try await sut.delete(id: todo.id)
         XCTAssertTrue(deleted)
 
         let result = try await sut.retrieve()
@@ -75,8 +75,8 @@ final class ToDoLocalDataStoreTests: XCTestCase {
     /// Test filtering ToDo items by different criteria (isDone, id, both).
     /// Expects: The correct matching items are returned in each case.
     func testFilterToDos() async throws {
-        let todo1 = ToDoTestHelper.makeDummy(id: "1", note: "Note 1", isDone: false)
-        let todo2 = ToDoTestHelper.makeDummy(id: "2", note: "Note 2", isDone: true)
+        let todo1 = ToDoTestHelper.makeDummyTodoCoreDataModel(id: "1", note: "Note 1", isDone: false)
+        let todo2 = ToDoTestHelper.makeDummyTodoCoreDataModel(id: "2", note: "Note 2", isDone: true)
         let success = try await sut.insert(pdfDatas: [todo1, todo2])
         XCTAssertTrue(success)
 
@@ -103,7 +103,7 @@ final class ToDoLocalDataStoreTests: XCTestCase {
     /// Test updating a non-existent ToDo item.
     /// Expects: The method throws an error.
     func testUpdateWithInvalidIDThrows() async {
-        let invalid = ToDoTestHelper.makeDummy(note: "Nothing", isDone: false)
+        let invalid = ToDoTestHelper.makeDummyTodoCoreDataModel(note: "Nothing", isDone: false)
         do {
             _ = try await sut.update(updatedData: invalid)
             XCTFail("Expected update to throw an error, but it didn't.")
@@ -116,7 +116,7 @@ final class ToDoLocalDataStoreTests: XCTestCase {
     /// Expects: The method throws an error.
     func testDeleteWithInvalidKeyThrows() async {
         do {
-            _ = try await sut.delete(pdfKey: "non-existent-id")
+            _ = try await sut.delete(id: "non-existent-id")
             XCTFail("Expected delete to throw an error, but it didn't.")
         } catch {
             XCTAssertNotNil(error)

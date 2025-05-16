@@ -9,7 +9,10 @@ import Foundation
 @testable import CoreDataWithTest
 
 final class ToDoTestHelper {
-    static func makeDummy(id: String =  UUID().uuidString, note: String = "Sample Note", isDone: Bool = false) -> ToDoCoreDataModel {
+    static func makeDummyTodoCoreDataModel(id: String =  UUID().uuidString, note: String = "Sample Note", isDone: Bool = false) -> ToDoCoreDataModel {
         return ToDoCoreDataModel(id: id , note: note, isDone: isDone)
     }
+    
+    
+    
 }

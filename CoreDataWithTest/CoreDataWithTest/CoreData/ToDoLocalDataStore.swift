@@ -69,21 +69,6 @@ class ToDoLocalDataStore {
         }
     }
 
-//    func update(updatedData: ToDoCoreDataModel) async throws -> ToDoCoreDataModel {
-//        try await perform { context in
-//            let request: NSFetchRequest<ToDoEntity> = ToDoEntity.fetchRequest()
-//            request.predicate = NSPredicate(format: "id == %@", updatedData.id)
-//            request.fetchLimit = 1
-//
-//            guard let entity = try context.fetch(request).first else {
-//                throw NSError(domain: "UpdateError", code: 404, userInfo: nil)
-//            }
-//
-//            entity.convertFromCoreDataModel(coreData: updatedData)
-//            try context.save()
-//            return updatedData
-//        }
-//    }
     
     func update(updatedData: ToDoCoreDataModel) async throws -> ToDoCoreDataModel {
         let results = try await filter(parameters: ["id": updatedData.id])
@@ -101,11 +86,11 @@ class ToDoLocalDataStore {
         }
     }
 
-    func delete(pdfKey: String) async throws -> Bool {
-        let results = try await filter(parameters: ["id": pdfKey])
+    func delete(id: String) async throws -> Bool {
+        let results = try await filter(parameters: ["id": id])
         
         guard let entity = results.first else {
-            throw NSError(domain: "DeleteError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Entity not found for key: \(pdfKey)"])
+            throw NSError(domain: "DeleteError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Entity not found for key: \(id)"])
         }
 
         return try await perform { context in
